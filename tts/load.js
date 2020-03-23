@@ -31,6 +31,26 @@ function processVoice(voiceName, text) {
 				req.end();
 				break;
 			}
+			case 'acapela': {
+				var buffers = [];
+				var req = https.request({
+					hostname: 'acapela-box.com',
+					path: '/AcaBox',
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
+				}, r => {
+					r.on('data', b => buffers.push(b));
+					r.on('end', () => {
+						var json = JSON.parse(Buffer.concat(buffers));
+						get(`https://acapela-box.com${json.file}`).then(res);
+					});
+				});
+				req.write(qs.encode({ text: text, voice: voice.arg }));
+				req.end();
+				break;
+			}
 			case 'cepstral':
 			case 'voiceforge': {
 				https.get('https://www.voiceforge.com/demo', r => {
